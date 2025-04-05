@@ -1,21 +1,40 @@
 # Copyright Saisui@github.io
 #
+# - end with bracket
+# - endless
+# - orignal ruby code
+#
+#
 # endless_ruby(code)
 #
-#   def hello(name)
+#   def hello(
+#       name,
+#       age,
+#     )
+#
 #     if name == 'madoka'
 #       puts 'hello, kamisama!'
 #     else
 #       puts "hello, #{name}!"
-#     ruby:
-#       {
-#         character: naame,
-#         charsize: name.size
-#       }
 #
+#     {
+#       character: name,
+#       charsize: name.size
+#       age:,
+#     }
+#
+#
+#   ruby:
+#     proc { what
+#       sink
+#     }.call
+#  
 
 def endless_ruby ss
   lines = []
+
+  ss,data = ss.split(/^(__END__.*)\z/m)
+
   ss.lines.each do |s|
      if lines.last in /[^\\]\\$/
        lines.last << s.lstrip
@@ -35,9 +54,9 @@ def endless_ruby ss
   is_ruby = false
 
   ruby_ind = 0
-  
+
   nls.each_with_index do |(ind, s), i|
-  
+
     if s in /^ruby:$/
       is_ruby = true
       ruby_ind = ind
@@ -67,8 +86,10 @@ def endless_ruby ss
         ret << (' ' * lacks.pop+"end\n")
       end
       ret << ' '*ind+s
-    else ret << ' '*ind+s
+    else
+      ret << ' '*ind+s
     end
+
   end
 
   ret << "\n"
@@ -77,7 +98,7 @@ def endless_ruby ss
     ret << ' '*lacks.pop+"end\n"
   end
 
-  ret.gsub(/^\s*end\s*\r?\n(?=\s*(?:when|else|elsif|rescue|ensure))/,'')
+  ret.gsub(/^\s*end\s*\r?\n(?=\s*(?:when|else|elsif|rescue|ensure|[\}\]\)]+))/,'') + (data||'')
   
 end
 
