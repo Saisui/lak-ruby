@@ -6,7 +6,9 @@ Ruby Utils
 input
 
 ```ruby
-def mine
+def mine(name, \
+  age, \
+)
   if a
     b
   else
@@ -20,7 +22,7 @@ def mine
 output:
 
 ```ruby
-def mine
+def mine(name, age)
   if a
     b
   else
