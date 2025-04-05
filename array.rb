@@ -1,5 +1,7 @@
 require 'json'
+
 class Array
+  
   def pyramid
     each_with_index.map do |a,i|
       arr[...i+1]
@@ -51,7 +53,9 @@ class Array
 end
 
 class String
+  
   def split_many(*pats)
+    
     def split_arr(arr,*pats)
       if pats==[]
         arr.dup
@@ -59,12 +63,14 @@ class String
         arr.map { _1.split_many(*pats) }
       end
     end
+    
     split_arr(split(pats[0]), *pats[1..])
   end
 
   def tsv2aa
     split_many("\n","\t").map { _1.map {|s| (s in /^"/) ? JSON(s) : s } }
   end
+  
   def tsv2ha
     tsv2aa.aa2ha
   end
