@@ -5,7 +5,7 @@ Ruby Utils
 
 input
 
-```py
+```ruby
 def mine
   if a
     b
@@ -19,7 +19,7 @@ def mine
 
 output:
 
-```
+```ruby
 def mine
   if a
     b
