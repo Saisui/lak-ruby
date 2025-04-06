@@ -60,7 +60,6 @@ Rack App Template
 
 ```ruby
 #import erio.d.edrb
-#import erio.d.edrb
 
 = '/'
 
