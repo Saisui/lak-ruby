@@ -38,6 +38,8 @@ def endless_ruby ss
   ss.lines.each do |s|
      if lines.last in /[^\\]\\$/
        lines.last << s.lstrip
+     elsif s in /^\s*$/
+       lines.last << s
      else lines << s
      end
   end
@@ -56,7 +58,7 @@ def endless_ruby ss
   ruby_ind = 0
 
   nls.each_with_index do |(ind, s), i|
-
+ 
     if s in /^ruby:$/
       is_ruby = true
       ruby_ind = ind
@@ -83,7 +85,7 @@ def endless_ruby ss
 
     if nls[i-1][0] > ind
       until (lacks.last < ind rescue true)
-        ret << (' ' * lacks.pop+"end\n")
+        ret << (' ' * lacks.pop+"end\n\n")
       end
       ret << ' '*ind+s
     else
