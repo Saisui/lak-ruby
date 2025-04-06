@@ -3,6 +3,17 @@ Ruby Utils
 
 ## Endless Ruby
 
+FEATURES:
+
+- endless
+- ruby code
+- bracket end
+- replace
+- eval
+- begin & end
+- context variables
+### OverView
+
 input
 
 ```ruby
@@ -41,14 +52,9 @@ def mine(name, age)
 end
 ```
 
-- endless
-- ruby code
-- bracket end
-- replace
-- eval
-- begin & end
 
-## COMPLEX EXAMPLE
+
+### COMPLEX EXAMPLE
 
 Rack App Template
 
