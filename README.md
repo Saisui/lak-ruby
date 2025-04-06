@@ -54,33 +54,29 @@ Rack App Template
 
 ```ruby
 #import erio.d.edrb
+#import erio.d.edrb
 
-class Erio
+= '/'
 
-  enter do |o|
-    #/ s.gsub(/^(\s*)\+ (.*?)$/) { $1 + "o.echo(#{$2})" }
-    #/ s.gsub(/^(\s*)\+\+ (.*?)$/) { $1 + "o.echoln(#{$2})" }
-    = '/'
+  200
+  'hello, world'
 
-      200
-      + 'hello, world'
+- 'videos'
 
-    - 'videos'
+  200
 
-      200
+  GET
 
-      GET
- 
-        + 'GET videos'
+    'GET videos'
 
-      = Integer : num
+  = Integer : num
 
-        + "video: #{num}"
+    "video: #{num}"
 
-    - true
+- true
 
-      404
-      + 'Not Found'
+  404
+  'Not Found'
 ```
 
 its imported config
@@ -88,8 +84,12 @@ its imported config
 ```ruby
 
 #BEGIN s << "require 'erio'\n"
+#BEGIN s << "\nclass Erio\n"
+#BEGIN s << "\n  enter do |o|\n"
 
 #> @verbs = "GET|POST|DELETE|UPDATE|HEAD|PUT|CONNECT|OPTIONS|TRACE|PATH"
+#/ s.gsub(/^(\s*)enter$/) { $1 + 'enter do' }
+#/ s.gsub(/^(\s*)enter : (\w+)$/) { $1 + 'enter do |#{$2}|' }
 #/ s.gsub(/^(\s*)(#{@verbs})$/) { $1 + + "o.is o.verb(#{$2.downcase.inspect}) do" }
 #/ s.gsub(/^(\s*)(#{@verbs}) (.*): (.+?)$/) { $1 + "o.is(o.verb(#{$2.downcase.inspect}), #{$3}) do |_, #{$4}|" }
 #/ s.gsub(/^(\s*)(#{@verbs})(.*)$/) { $1 + "o.is(o.verb(#{$2.downcase.inspect}), #{$3}) do" }
@@ -98,8 +98,13 @@ its imported config
 #/ s.gsub(/^(\s*)- (.*?)$/) { $1 + "o.on #{$2} do" }
 #/ s.gsub(/^(\s*)=(.*?)$/) { $1 + "o.is #{$2} do" }
 #/ s.gsub(/^(\s*)(\d+)$/) { $1 + "o.status #{$2}" }
+#/ s.gsub(/^(\s*)\+ (.*?)$/) { $1 + "o.echo(#{$2})" }
+#/ s.gsub(/^(\s*)\+\+ (.*?)$/) { $1 + "o.echoln(#{$2})" }
+#/ if @parent in /^\s*=($|[^=]+)/ and sb =~ /^(['"].+)$/; bs + "o.echoln(#{$1})"; else s; end
 
+#END ret = ret.lines.map { '    ' + _1 }.join
 #END ret << "\nrun Erio"
+
 ```
 
 Finally, Let's run
