@@ -1,0 +1,13 @@
+#BEGIN s << "require 'erio'\n"
+
+#> @verbs = "GET|POST|DELETE|UPDATE|HEAD|PUT|CONNECT|OPTIONS|TRACE|PATH"
+#/ s.gsub(/^(\s*)(#{@verbs})$/) { $1 + + "o.is o.verb(#{$2.downcase.inspect}) do" }
+#/ s.gsub(/^(\s*)(#{@verbs}) (.*): (.+?)$/) { $1 + "o.is(o.verb(#{$2.downcase.inspect}), #{$3}) do |_, #{$4}|" }
+#/ s.gsub(/^(\s*)(#{@verbs})(.*)$/) { $1 + "o.is(o.verb(#{$2.downcase.inspect}), #{$3}) do" }
+#/ s.gsub(/^(\s*)- (.*?) : (.+?)$/) { $1 + "o.on #{$2} do |#{$3}|" }
+#/ s.gsub(/^(\s*)=(.*?) : (.+?)$/) { $1 + "o.is #{$2} do |#{$3}|" }
+#/ s.gsub(/^(\s*)- (.*?)$/) { $1 + "o.on #{$2} do" }
+#/ s.gsub(/^(\s*)=(.*?)$/) { $1 + "o.is #{$2} do" }
+#/ s.gsub(/^(\s*)(\d+)$/) { $1 + "o.status #{$2}" }
+
+#END ret << "\nrun Erio"
