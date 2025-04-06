@@ -7,6 +7,14 @@
 #
 # endless_ruby(code)
 #
+#   ruby:
+#     ss = <<~SLIM
+#       body
+#         ul
+#           - 3.times do |i|
+#             li = i
+#     SLIM
+#
 #   def hello(
 #       name,
 #       age,
@@ -23,13 +31,6 @@
 #       age:,
 #     }
 #
-#
-#   ruby:
-#     proc { what
-#       sink
-#     }.call
-#  
-
 def endless_ruby ss
   lines = []
 
