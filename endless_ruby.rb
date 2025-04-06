@@ -1,11 +1,17 @@
 # Copyright Saisui@github.io
 #
+# FEATURES
+#
 # - end with bracket
 # - endless
 # - orignal ruby code
-#
+# - comment linear eval code
+# - comment linear replacement
+# 
 #
 # endless_ruby(code)
+#
+# code is:
 #
 #   ruby:
 #     ss = <<~SLIM
@@ -106,6 +112,8 @@ def endless_ruby ss
 end
 
 # example
+# #> @verbs = "GET|POST"
+# #/ s.gsub(/^#{@verbs}$/) { "o.is(o.verb(#{}))" }
 # #/ s.gsub(/^- (.*) : (.*)$/) { "o.on #{$1} do |#{$2}|"
 # #/ s.gsub(/^- (.*)$/) { "o.on #{$1} do" }
 def replace_short ss
@@ -113,12 +121,22 @@ def replace_short ss
   to_run = []
 
   ss.lines.map do |s|
+    if s in /^\s*#>(.*)$/
+      eval $1
+      next
+    end
+
     if s in /#\/(.*)$/
       to_run << $1
+      next
     end
-    for p in to_run
-      s = eval(p, binding) || s
+
+    if s !~ /^\s*#/
+      for p in to_run
+        s = eval(p, binding) || s
+      end
     end
+ 
     s
   end.join
 
