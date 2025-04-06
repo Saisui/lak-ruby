@@ -143,9 +143,47 @@ def replace_short ss
     }
     s
   end.call
+  ssl = ["\n"]+ss.lines
 
-  ret << ss.lines.map do |s|
+  @parents = []
 
+  ret << ssl.each_with_index.map do |s, i|
+
+    if i == 0
+      @prev = "\n"
+    else
+      @prev = ssl[i-1]
+    end
+
+    next if s in /\A\s*$/
+ 
+    @prev_indent = @prev.match(/\A(\s*)/)[0].size
+
+    if i == ssl.size-1
+      @post = "\n"
+    else
+      @post = ssl[i+1]
+    end
+
+    @post_indent = @post.match(/\A(\s*)/)[0].size
+
+    @s_indent = s.match(/\A(\s*)/)[0].size
+
+    if @post_indent > @s_indent
+      @parents << s.dup
+    end
+
+    until @parents.empty? || @post_indent > @parents.last.match(/\A(\s*)/)[0].size
+      @parents.pop
+    end
+
+    @parent = @parents.last
+
+    @in_end   = @post_indent > @s_indent
+    @in_begin = @prev_indent < @s_indent
+
+    _, bs, sb = [*s.match(/\A(\s*)(.*)\z/)]
+    
     if s in /^\s*#>\s+(.*)$/
       eval $1
       next
@@ -183,5 +221,5 @@ def replace_short ss
 end
 
 if $0 == __FILE__
-  puts replace_short endless_ruby File.read ARGV[0]
+  puts endless_ruby replace_short File.read ARGV[0]
 end
