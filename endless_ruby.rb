@@ -105,6 +105,25 @@ def endless_ruby ss
   
 end
 
+# example
+# #/ s.gsub(/^- (.*) : (.*)$/) { "o.on #{$1} do |#{$2}|"
+# #/ s.gsub(/^- (.*)$/) { "o.on #{$1} do" }
+def replace_short ss
+
+  to_run = []
+
+  ss.lines.map do |s|
+    if s in /#\/(.*)$/
+      to_run << $1
+    end
+    for p in to_run
+      s = eval(p, binding) || s
+    end
+    s
+  end.join
+
+end
+
 if $0 == __FILE__
-  puts endless_ruby File.read ARGV[0]
+  puts replace_short endless_ruby File.read ARGV[0]
 end
