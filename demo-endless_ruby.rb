@@ -1,32 +1,28 @@
-require 'erio'
+#import demo-erio.d.edrb
 
 class Erio
 
   enter do |o|
-
-    #/ s.gsub(/^(\s*)- (.*?) : (.+?)$/) { $1 + "o.on #{$2} do |#{$3}|" }
-    #/ s.gsub(/^(\s*)=(.*?) : (.+?)$/) { $1 + "o.is #{$2} do |#{$3}|" }
-    #/ s.gsub(/^(\s*)- (.*?)$/) { $1 + "o.on #{$2} do" }
-    #/ s.gsub(/^(\s*)=(.*?)$/) { $1 + "o.is #{$2} do" }
-
+    #/ s.gsub(/^(\s*)\+ (.*?)$/) { $1 + "o.echo(#{$2})" }
+    #/ s.gsub(/^(\s*)\+\+ (.*?)$/) { $1 + "o.echoln(#{$2})" }
     = '/'
 
-      o.status 200
-      o.echo 'hello, world'
+      200
+      + 'hello, world'
 
-    - 'video'
+    - 'videos'
 
-      =
+      200
 
-        o.echo 'videos'
+      GET
+ 
+        + 'GET videos'
 
       = Integer : num
 
-        o.echo "video: #{num}"
+        + "video: #{num}"
 
     - true
 
-      o.status 404
-      o.echo 'Not Found'
-
-run Erio
+      404
+      + 'Not Found'
