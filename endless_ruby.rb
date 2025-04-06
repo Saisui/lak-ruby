@@ -120,13 +120,47 @@ def replace_short ss
 
   to_run = []
 
-  ss.lines.map do |s|
-    if s in /^\s*#>(.*)$/
+  begin_runs = []
+
+  end_runs = []
+
+  ret = ''
+
+  ss = ss.gsub /^(\s*)#import\s+(\S*)$/ do
+    File.read($2).lines.map { $1 + _1 }.join
+  end
+
+  ss.lines.each do |s|
+    if s in /^\s*#BEGIN\s+(.*)$/
+      begin_runs << $1
+    end
+  end
+
+  s_begin = proc do
+    s = ''
+    begin_runs.each {
+      eval _1, binding
+    }
+    s
+  end.call
+
+  ret << ss.lines.map do |s|
+
+    if s in /^\s*#>\s+(.*)$/
       eval $1
       next
     end
 
-    if s in /#\/(.*)$/
+    if s in /^\s*#BEGIN\s+/
+      next
+    end
+
+    if s in /#END\s+(.*)$/
+      end_runs << $1
+      next
+    end
+
+    if s in /#\/\s+(.*)$/
       to_run << $1
       next
     end
@@ -139,6 +173,12 @@ def replace_short ss
  
     s
   end.join
+
+  end_runs.each do |ev|
+    eval ev, binding
+  end
+  
+  s_begin + ret
 
 end
 
