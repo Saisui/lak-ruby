@@ -107,7 +107,7 @@ def endless_ruby ss
     ret << ' '*lacks.pop+"end\n"
   end
 
-  ret.gsub(/^\s*end\s*\r?\n(?=\s*(?:when|else|elsif|rescue|ensure|[\}\]\)]+))/,'') + (data||'')
+  ret.gsub(/^\s*end\s*\r?\n(?=\s*(?:when|in|else|elsif|rescue|ensure|[\}\]\)]+))/,'') + (data||'')
   
 end
 
@@ -117,7 +117,7 @@ end
 # #/ s.gsub(/^- (.*) : (.*)$/) { "o.on #{$1} do |#{$2}|"
 # #/ s.gsub(/^- (.*)$/) { "o.on #{$1} do" }
 def replace_short ss
-
+  require './array'
   to_run = []
 
   begin_runs = []
@@ -126,11 +126,24 @@ def replace_short ss
 
   ret = ''
 
+
   ss = ss.gsub /^(\s*)#import\s+(\S*)$/ do
     File.read($2).lines.map { $1 + _1 }.join
   end
 
-  ss.lines.each do |s|
+  # ssl = ["\n"] + ss.split(/(^#END<<\n.*?\n#END<\.$|^#\/\/.\n.*?\n#\/\.$|#>>\n.*?\n#>\.$)/m)
+  ssl = ["\n"] + ss.split(/(^(?:#END<<|#\/\/|#>>)\n.*?\n)(?=#\S)/m)
+         .map { |s|
+           if s in /^(#END<<|#\/\/|#>>)/
+             s
+           else 
+             s.lines
+           end
+         }.flatten
+
+  # pp ssl.size, ssl.each_with_index.to_a.map(&:reverse)
+
+  ssl.each do |s|
     if s in /^\s*#BEGIN\s+(.*)$/
       begin_runs << $1
     end
@@ -143,19 +156,55 @@ def replace_short ss
     }
     s
   end.call
-  ssl = ["\n"]+ss.lines
 
   @parents = []
 
   ret << ssl.each_with_index.map do |s, i|
+  
+    next s if s in /\A\s*\z/
+    
+    if s in /^\s*#>\s+(.*)$/
+      eval $1
+      next
+    end
+
+    if s in /^#>>/
+      eval s
+      next
+    end
+
+    if s in /^\s*#BEGIN\s+/
+      next
+    end
+
+    if s in /^#END\s+(.*)$/
+      end_runs << $1
+      next
+    end
+
+
+    if s in /^#END<</m
+      # puts 'END!', s
+      end_runs << s
+      next
+    end
+
+    if s in /^\s*#\/\s+(.*)/
+      # p lnr: s
+      to_run << $1
+      next
+    end
+
+    if s in /^\s*#\/\//
+      to_run << s
+      next
+    end
 
     if i == 0
       @prev = "\n"
     else
       @prev = ssl[i-1]
     end
-
-    next if s in /\A\s*$/
  
     @prev_indent = @prev.match(/\A(\s*)/)[0].size
 
@@ -179,44 +228,34 @@ def replace_short ss
 
     @parent = @parents.last
 
+    @is_begin = @s_indent < @post_indent
     @in_end   = @post_indent > @s_indent
     @in_begin = @prev_indent < @s_indent
 
-    _, bs, sb = [*s.match(/\A(\s*)(.*)\z/)]
+    _, bs, sb = [*s.match(/\A( *)(.*)/m)]
     
-    if s in /^\s*#>\s+(.*)$/
-      eval $1
-      next
-    end
-
-    if s in /^\s*#BEGIN\s+/
-      next
-    end
-
-    if s in /#END\s+(.*)$/
-      end_runs << $1
-      next
-    end
-
-    if s in /#\/\s+(.*)$/
-      to_run << $1
-      next
-    end
 
     if s !~ /^\s*#/
       for p in to_run
-        s = eval(p, binding) || s
+        s = p && eval(p, binding) || s
       end
     end
  
     s
   end.join
 
+  s_end = ''
+
   end_runs.each do |ev|
-    eval ev, binding
+    if ev in /#END<</m
+      # puts 'ENDLESS END!', ev
+      s_end << ev.lines[1..].join
+    else
+      eval ev, binding
+    end
   end
-  
-  s_begin + ret
+
+  s_begin + ret + s_end
 
 end
 
