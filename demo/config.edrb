@@ -3,21 +3,24 @@
 = '/'
 
   200
-  'hello, world'
-
-- 'videos'
+  cookie: 'SESSDATA=123'
+  + o.html '<h1>hello, world!</h1>'
+- 'art'
+  = Integer : num
+    +md $num
+- 'video'
 
   200
 
   GET
 
-    'GET videos'
+    :videos.slim
 
   = Integer : num
 
-    "video: #{num}"
+    < "video/#{num}.mp4"
 
-- true
+-
 
   404
   'Not Found'
