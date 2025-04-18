@@ -70,6 +70,10 @@ class JSONLines
   #      j['score'] += 15
   #    end
   #
+  #    js.update grade: 'adult' do
+  #      age > 20 && type == 'human'
+  #    end
+  #
   #  SAVE & RELOAD
   #
   #    js.save
@@ -88,7 +92,6 @@ class JSONLines
 
   def select **key_conds, &blk
     if key_conds.empty?
-      require 'ostruct'
       all.select {
         OpenStruct.new(_1).instance_eval(&blk)
       }
@@ -167,6 +170,23 @@ class JSONLines
         raise "DENY CONDITION [#{k}] is assume!" if c  === @json[k.to_s]
       end
     end
+  end
+
+  def update **kws, &blk
+    select(&blk).each {|j|
+      j.merge!(kws.map {|k, v|
+        if v in Proc
+          [k.to_s, v.call(j[k.to_s])]
+        else [k.to_s, v]
+        end
+      }.to_h)
+    }
+    self
+  end
+
+  def to_table
+    keys = @jsons.map(&:keys).flatten.uniq.map(&:to_s).uniq
+    [keys] + @jsons.map { _1.values_at(*keys) }
   end
 
 end
