@@ -70,6 +70,7 @@ class JSONLines
   attr_accessor :auto
 
   alias all jsons
+  alias to_jsonl to_jsonlines
 
   def select **key_conds, &blk
     if key_conds.empty?
@@ -102,7 +103,7 @@ class JSONLines
     self
   end
 
-  def to_jsonline
+  def to_jsonlines
     @jsons.map{_1.to_json}.join("\n")+"\n"
   end
 
