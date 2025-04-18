@@ -1,16 +1,16 @@
-class JSONLine
+class JSONLines
 
   #
   # USAGE:
   # 
   #  SCHEME
   #
-  #    js = JSONLine.new('test.jsonl') do |json,db|
+  #    js = JSONLines.new('test.jsonl') do |json,db|
   #      json['id'] = db.size+1
   #      json['creat_time'] = Time.now.to_i
   #    end
   #
-  #    js = JSONLine.new('test.jsonl') do |json, db|
+  #    js = JSONLines.new('test.jsonl') do |json, db|
   #      eval File.read('test.schema.rb'), binding
   #    end
   #
