@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class JSONLines
 
   #
@@ -25,6 +27,19 @@ class JSONLines
   #    end
   #
   #    raise 'same name' if db.has?(name: json['name'])
+  #
+  #    db.uniq :name
+  #
+  #  CONSTRICT
+  #
+  #    db.must { age > 20 }
+  #    db.must age: -> { _1 > 21 }
+  #    db.deny { age < 21 }
+  #
+  #  INCREASING
+  #
+  #    json[:id] = db.size + 1
+  #    json[:creat_time] = Time.now.to_i
   #
   #  LIMIT
   #
@@ -70,7 +85,6 @@ class JSONLines
   attr_accessor :auto
 
   alias all jsons
-  alias to_jsonl to_jsonlines
 
   def select **key_conds, &blk
     if key_conds.empty?
@@ -97,15 +111,21 @@ class JSONLines
   end
 
   def insert **kws
+
     j = JSON(kws.to_json)
+    @json = j
+
     auto.call(j,self) if @auto
     @jsons << j
+
     self
   end
 
   def to_jsonlines
     @jsons.map{_1.to_json}.join("\n")+"\n"
   end
+  
+  alias to_jsonl to_jsonlines
 
   def save
     File.write(@file, to_jsonline)
@@ -119,6 +139,34 @@ class JSONLines
 
   def has? **kws
     !select(**kws).empty?
+  end
+
+  def uniq key
+    raise "KEY [#{key}] VALUE already exist!" if has? key => @json[key.to_s]
+  end
+
+  def must key=nil, **kws, &blk
+    if key
+      raise "CONDITION [#{key}] not assume!" unless blk.call(@json[key.to_s])
+    elsif blk
+      raise "CONDITION not assume!" unless OpenStruct.new(@json).instance_eval(&blk)
+    elsif !kws.empty?
+      kws.each_pair do |k, c|
+        raise "CONDITION [#{k}] not assume!" unless c  === @json[k.to_s]
+      end
+    end
+  end
+
+  def deny key=nil, **kws, &blk
+    if key
+      raise "DENY CONDITION [#{key}] is assume!" if blk.call(@json[key.to_s])
+    elsif blk
+      raise "DENY CONDITION is assume!" if OpenStruct.new(@json).instance_eval(&blk)
+    elsif !kws.empty?
+      kws.each_pair do |k, c|
+        raise "DENY CONDITION [#{k}] is assume!" if c  === @json[k.to_s]
+      end
+    end
   end
 
 end
