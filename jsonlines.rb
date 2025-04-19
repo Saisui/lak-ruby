@@ -106,6 +106,7 @@ class JSONLines
       @jsons = sss[1].lines.map { JSON(_1) }
       @auto  = proc{|json,db| eval @code, binding }
     else
+      @jsons = ss.lines.map { JSON(_1) }
       @auto = auto ? proc{|json,db| eval File.read(auto), binding } : auto_trig
     end
   end
@@ -169,7 +170,7 @@ class JSONLines
       @jsons = sss[1].lines.map { JSON(_1) }
       @auto  = proc{|json,db| eval @code, binding }
     else
-      @jsons = File.read(@file).lines.map { JSON(_1) }
+      @jsons = ss.lines.map { JSON(_1) }
     end
  
     self
