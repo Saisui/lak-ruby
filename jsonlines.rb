@@ -97,6 +97,11 @@ class JSONLines
   #
   #    people = JSONLines.new("people.jsonl")
   #
+  #  TO TABLE / JSONLINES
+  #
+  #    people.to_table
+  #    people.to_jsonl
+  #
   def initialize filename, auto: nil, &auto_trig
     @file = filename
     ss = File.read(filename)
@@ -170,7 +175,7 @@ class JSONLines
       @jsons = sss[1].lines.map { JSON(_1) }
       @auto  = proc{|json,db| eval @code, binding }
     else
-      @jsons = ss.lines.map { JSON(_1) }
+      @jsons = sd.lines.map { JSON(_1) }
     end
  
     self
@@ -184,14 +189,20 @@ class JSONLines
     raise "KEY [#{key}] VALUE already exist!" if has? key => @json[key.to_s]
   end
 
-  def must key=nil, **kws, &blk
-    if key
-      raise "CONDITION [#{key}] not assume!" unless blk.call(@json[key.to_s])
-    elsif blk
-      raise "CONDITION not assume!" unless OpenStruct.new(@json).instance_eval(&blk)
-    elsif !kws.empty?
+  def must *keys, **kws, &blk
+    if !keys.empty?
+      keys.each do |k|
+        raise "KEY [#{key}] is required!" unless @json.has_key? k.to_s
+      end
+    end
+
+    if blk
+      raise "some CONDITION not assume!" unless OpenStruct.new(@json).instance_eval(&blk)
+    end
+
+    if !kws.empty?
       kws.each_pair do |k, c|
-        raise "CONDITION [#{k}] not assume!" unless c  === @json[k.to_s]
+        raise "CONDITION [#{k}] not assume!" unless c === @json[k.to_s]
       end
     end
   end
