@@ -3,7 +3,7 @@ require 'ostruct'
 class JSONLines
 
   #
-  # USAGE:
+  #  USAGE:
   # 
   #  SCHEME
   #
@@ -79,10 +79,35 @@ class JSONLines
   #    js.save
   #    js.reload
   #
+  #  SCHEMA in .JSONL
+  #
+  #    use /^---+\n/ split schema and jsonlines
+  #
+  #    json['id'] = db.size + 1
+  #    json['create_time'] = Time.now.to_i
+  #    json['pro'] ||= false
+  #    db.uniq :name
+  #    db.must { age >= 21 }
+  #    ---
+  #    {"name":"reimu","id":1,"pro":false,"create_time":1145141919}
+  #    {"name":"nene","id":2,"pro":true,"create_time":11407210721}
+  #    {"name":"komeiji_koishi","id":3,"pro":true,"create_time":514514514}
+  #
+  #    call just
+  #
+  #    people = JSONLines.new("people.jsonl")
+  #
   def initialize filename, auto: nil, &auto_trig
-    @jsons = File.read(filename).lines.map { JSON(_1) }
     @file = filename
-    @auto = auto ? proc{|json,db| eval File.read(auto), binding } : auto_trig
+    ss = File.read(filename)
+    sss = ss.split(/^---+\n/)
+    if sss.size > 1
+      @code = sss[0]
+      @jsons = sss[1].lines.map { JSON(_1) }
+      @auto  = proc{|json,db| eval @code, binding }
+    else
+      @auto = auto ? proc{|json,db| eval File.read(auto), binding } : auto_trig
+    end
   end
 
   attr :file, :jsons
@@ -92,6 +117,7 @@ class JSONLines
 
   def select **key_conds, &blk
     if key_conds.empty?
+      require 'ostruct'
       all.select {
         OpenStruct.new(_1).instance_eval(&blk)
       }
@@ -131,12 +157,21 @@ class JSONLines
   alias to_jsonl to_jsonlines
 
   def save
-    File.write(@file, to_jsonline)
+    File.write(@file, (@code ? @code+"---\n" : '') + to_jsonlines)
     self
   end
 
   def reload
-    @jsons = File.read(@file).lines.map { JSON(_1) }
+    ss = File.read(@file)
+    sss = ss.split(/^---+\n/)
+    if sss.size > 1
+      @code = sss[0]
+      @jsons = sss[1].lines.map { JSON(_1) }
+      @auto  = proc{|json,db| eval @code, binding }
+    else
+      @jsons = File.read(@file).lines.map { JSON(_1) }
+    end
+ 
     self
   end
 
